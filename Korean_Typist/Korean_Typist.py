@@ -1,31 +1,29 @@
 import reflex as rx
 import time #type: ignore
 import random
+import json
+
+with open("sentences.json", 'r', encoding='utf-8') as file:
+    text = json.load(file)['sentences']
 
 class State(rx.State):
-    sentences = [
-        "타이핑 연습을 시작하세요. 이 문장을 정확하게 입력해보세요.",
-        "빠른 브라운 여우가 게으른 개를 뛰어넘었습니다.",
-        "프로그래밍은 논리적 사고와 창의성이 필요한 분야입니다.",
-        "시간은 금이라고 합니다. 하지만 경험은 다이아몬드입니다.",
-        "끊임없는 노력과 열정이 성공의 열쇠입니다."
-    ]
+    sentences = text
     text_to_type: str = sentences[0]
     user_input: str = ""
-    cpm: float = 0
+    cpm: float = 0.0
     cpm_display: str = "0.00"
-    accuracy: float = 0
-    start_time: float = 0
+    accuracy: float = 0.0
+    start_time: float = 0.0
     
 
     def update_input(self, value: str):
-        if self.start_time == 0:
+        if self.start_time == 0.0:
             self.start_time = time.time()
         self.user_input = value
         self.calculate_cpm_and_accuracy()
 
     def calculate_cpm_and_accuracy(self):
-        if self.start_time == 0:
+        if self.start_time == 0.0:
             return
         
         elapsed_time = time.time() - self.start_time
@@ -44,26 +42,32 @@ class State(rx.State):
     def next_sentence(self):
         self.text_to_type = random.choice(self.sentences)
         self.user_input = ""
-        self.start_time = 0
-        self.cpm = 0
+        self.start_time = 0.0
+        self.cpm = 0.0
         self.cpm_display = "0.00"
-        self.accuracy = 0
+        self.accuracy = 0.0
 
 def index():
     return rx.vstack(
-        rx.heading("타이핑 연습 앱"),
-        rx.text(State.text_to_type, color="blue"),
+        rx.heading("타이핑 연습 앱", align="center"),  # 제목을 가운데 정렬
+        rx.hstack(
+            rx.text(f"속도: {State.cpm_display} CPM", color="green", size="lg"),  # 속도 텍스트 크기 조정
+            rx.text(f"정확도: {State.accuracy:.1f}%", color="orange", size="lg"),  # 정확도 텍스트 크기 조정
+            spacing="5",
+            align="center"  # 속도와 정확도 텍스트를 가운데 정렬
+        ),
+        rx.text(State.text_to_type, color="blue", align="center"),  # 문장도 가운데 정렬
         rx.input(
             placeholder="여기에 타이핑하세요",
             on_change=State.update_input,
             value=State.user_input,
-            width="300px"
+            width="400px",  # 입력 필드의 너비를 늘림
+            height="40px",  # 입력 필드의 높이를 늘림
+            size="lg",
+            align="center"  # 입력 필드도 가운데 정렬
         ),
-        rx.hstack(
-            rx.text(f"속도: {State.cpm_display} CPM", color="green"),
-            rx.text(f"정확도: {State.accuracy:.1f}%", color="orange")
-        ),
-        rx.button("다음 문장", on_click=State.next_sentence)
+        rx.button("다음 문장", on_click=State.next_sentence, width="200px", align="center"),  # 버튼을 가운데 정렬
+        align="center" 
     )
 
 app = rx.App()
